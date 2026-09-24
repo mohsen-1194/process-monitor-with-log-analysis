@@ -1,0 +1,15 @@
+[Unit]
+Description=A Python script that monitors processes.
+After=network.target
+
+[Service]
+Type=exec
+User=root
+WorkingDirectory=/home/***/projects/monitoring_os
+ExecStart=/home/***/projects/monitoring_os/.venv/bin/python /home/***/projects/monitoring_os/main.py
+Restart=always
+RestartSec=10
+SyslogIdentifier=monitor_script
+
+[Install]
+WantedBy=multi-user.target
