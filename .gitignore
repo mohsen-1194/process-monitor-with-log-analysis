@@ -11,4 +11,3 @@ wheels/
 
 # added by me
 .mypy_cache
-logs

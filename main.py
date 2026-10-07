@@ -1,11 +1,12 @@
 import json
 import subprocess
 import time
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 import psutil
 
-# LOG_PATH = "/var/log/syslog"
+LOG_PATH = "/var/log/syslog"
 CPU_THRESHOLD = 50  # percent
 MEMORY_THRESHOLD = 800  # MB
 INTERVAL = 3600  # seconds
@@ -74,6 +75,38 @@ def process_monitoring(cpu_limit: float, mem_limit: float):
     return msg
 
 
+def is_within_last_24_hours(timestamp: str) -> bool:
+    log_time = datetime.fromisoformat(timestamp)
+    now = datetime.now().astimezone()
+    last_24_hours = now - timedelta(hours=24)
+    return last_24_hours <= log_time <= now
+
+
+def log_analysis2(path: str) -> str:
+    logs = []
+
+    with open(path, "r") as f:
+        for line in f:
+            log_data = line.split(maxsplit=3)
+            if len(log_data) < 4:  # skip empty or malformed lines
+                continue
+
+            timestamp = log_data[0]
+            try:
+                if not is_within_last_24_hours(timestamp):
+                    continue
+            except ValueError:  # first word is not a valid timestamp
+                continue
+
+            logs.append({"timestamp": timestamp, "message": log_data[3].strip()})
+
+    msg = "---------- log analysis ----------" + "\n"
+    for log in logs:
+        msg += f"{log['timestamp']} message: {log['message']}" + "\n"
+
+    return msg
+
+
 def log_analysis():
 
     log_level = {
@@ -110,12 +143,16 @@ def log_analysis():
         msg += (
             f"{l['timestamp']} log-level:[{l['level']}] message: {l['message']}" + "\n"
         )
+
     return msg
 
 
 def report_generation(monitor: str, log: str):
-    now = datetime.now(tz=UTC).strftime("%Y-%m-%d_%H-%M-%S")
-    with open(f"logs/{now}.txt", "w") as file:
+    path = Path("logs")
+    path.mkdir(exist_ok=True)
+    now = datetime.now(tz=UTC).strftime("%Y-%m-%d-%H-%M-%S")
+
+    with open(f"{path}/{now}.txt", "w", encoding="utf-8") as file:
         file.write(monitor)
         file.write(log)
 
@@ -128,7 +165,8 @@ def main():
             monitor_report = process_monitoring(CPU_THRESHOLD, MEMORY_THRESHOLD)
 
             print("Analyzing logs...")
-            log_report = log_analysis()
+            # log_report = log_analysis()
+            log_report = log_analysis2(LOG_PATH)
 
             print("Generationg report...")
             report_generation(monitor_report, log_report)
