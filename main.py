@@ -27,7 +27,7 @@ def network_monitoring():
 def trim_command(): ...
 
 
-def process_monitoring(cpu_limit: float, mem_limit: float):
+def process_monitoring(cpu_limit: float, mem_limit: float) -> str:
 
     # setting a base for cpu usage comparision
     list(psutil.process_iter(["cpu_percent"]))
@@ -110,7 +110,7 @@ def log_analysis2(path: str) -> str:
     return msg
 
 
-def log_analysis():
+def log_analysis() -> str:
     """This function is better because the prompt said
     that report should have timestamp, log level and message but
     log level doesn't appear in /var/log/syslog so I used journalctl
@@ -155,7 +155,7 @@ def log_analysis():
     return msg
 
 
-def report_generation(monitor: str, log: str):
+def report_generation(monitor: str, log: str) -> None:
     path = Path("logs")
     path.mkdir(exist_ok=True)
     now = datetime.now(tz=UTC).strftime("%Y-%m-%d-%H-%M-%S")
@@ -165,7 +165,7 @@ def report_generation(monitor: str, log: str):
         file.write(log)
 
 
-def main():
+def main() -> None:
 
     while True:
         try:
