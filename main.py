@@ -76,6 +76,9 @@ def process_monitoring(cpu_limit: float, mem_limit: float):
 
 
 def is_within_last_24_hours(timestamp: str) -> bool:
+    """This function only works with iso format.
+    Classic format timestamps need another implementation.
+    """
     log_time = datetime.fromisoformat(timestamp)
     now = datetime.now().astimezone()
     last_24_hours = now - timedelta(hours=24)
@@ -108,7 +111,12 @@ def log_analysis2(path: str) -> str:
 
 
 def log_analysis():
-
+    """This function is better because the prompt said
+    that report should have timestamp, log level and message but
+    log level doesn't appear in /var/log/syslog so I used journalctl
+    command to read the logs. Also the problem with classic format timestamps
+    solved here.
+    """
     log_level = {
         "0": "emerg",
         "1": "alert",
