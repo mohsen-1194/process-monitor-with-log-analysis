@@ -75,6 +75,10 @@ def process_monitoring(cpu_limit: float, mem_limit: float) -> str:
     return msg
 
 
+def handle_format(timestamp: str):
+    """Handles all types of log formats."""
+
+
 def is_within_last_24_hours(timestamp: str) -> bool:
     """This function only works with iso format.
     Classic format timestamps need another implementation.
